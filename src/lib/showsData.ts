@@ -152,7 +152,7 @@ export const SHOWS: Omit<Show, "_id">[] = [
     posterImage: "/from.png",
     genre: ["Horror", "Mystery", "Sci-Fi"],
     releaseYear: 2022,
-    totalSeasons: 3,
+    totalSeasons: 4,
     difficulty: "Hard",
     totalQuestions: 200,
     isActive: true,

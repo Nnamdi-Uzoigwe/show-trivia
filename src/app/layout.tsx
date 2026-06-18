@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ShowTrivia — Prove You Actually Watched It",
+  title: "ShowTrivia | Prove You Actually Watched It",
   description: "Test your knowledge of the greatest TV shows ever made.",
   openGraph: {
     title: "ShowTrivia",
