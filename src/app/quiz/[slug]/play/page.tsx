@@ -16,8 +16,13 @@ export default function PlayPage() {
   const router = useRouter();
   const { user } = useUserStore();
   const {
-    questions, currentIndex, isFinished, isStarted,
-    setQuestions, finishQuiz, resetQuiz,
+    questions,
+    currentIndex,
+    isFinished,
+    isStarted,
+    setQuestions,
+    finishQuiz,
+    resetQuiz,
   } = useQuizStore();
 
   const [loading, setLoading] = useState(true);
@@ -49,63 +54,95 @@ export default function PlayPage() {
   // }, []);
 
   useEffect(() => {
-  if (!user) { router.push("/"); return; }
-
-  async function loadQuiz() {
-    try {
-      const res = await fetch(`/api/questions?slug=${slug}&limit=20`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load questions");
-      if (!data.questions?.length) throw new Error("No questions found for this show yet.");
-      setQuestions(data.questions, slug as string, show?.title ?? "");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!user) {
+      router.push("/");
+      return;
     }
-  }
 
-  loadQuiz();
-}, [slug]);
+    async function loadQuiz() {
+      try {
+        const res = await fetch(`/api/questions?slug=${slug}&limit=20`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load questions");
+        if (!data.questions?.length)
+          throw new Error("No questions found for this show yet.");
+        setQuestions(data.questions, slug as string, show?.title ?? "");
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (!show) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p style={{ color: "var(--text-secondary)" }}>Show not found.</p>
-    </div>
-  );
+    loadQuiz();
 
-  if (loading) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-        className="w-10 h-10 rounded-full border-2"
-        style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }}
-      />
-      <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
-        Loading your questions...
-      </p>
-    </div>
-  );
+    // Prevent browser back from going to play page
+window.history.pushState(null, "", window.location.href);
+window.onpopstate = () => {
+  resetQuiz();
+  router.push(`/quiz/${slug}`);
+};
 
-  if (error) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6">
-      <span className="text-4xl">😬</span>
-      <p className="font-clash text-xl" style={{ color: "var(--text-primary)" }}>
-        Something went wrong
-      </p>
-      <p style={{ color: "var(--text-secondary)", fontSize: "14px", textAlign: "center" }}>
-        {error}
-      </p>
-      <button className="btn-ghost" onClick={() => router.push(`/quiz/${slug}`)}>
-        ← Back to Preview
-      </button>
-    </div>
-  );
+return () => {
+  window.onpopstate = null;
+};
+  }, [slug]);
 
-  if (isFinished) return (
-    <QuizResult slug={slug as string} showTitle={show.title} />
-  );
+  if (!show)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p style={{ color: "var(--text-secondary)" }}>Show not found.</p>
+      </div>
+    );
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          className="w-10 h-10 rounded-full border-2"
+          style={{
+            borderColor: "var(--border)",
+            borderTopColor: "var(--accent)",
+          }}
+        />
+        <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
+          Loading your questions...
+        </p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6">
+        <span className="text-4xl">😬</span>
+        <p
+          className="font-clash text-xl"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Something went wrong
+        </p>
+        <p
+          style={{
+            color: "var(--text-secondary)",
+            fontSize: "14px",
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </p>
+        <button
+          className="btn-ghost"
+          onClick={() => router.push(`/quiz/${slug}`)}
+        >
+          ← Back to Preview
+        </button>
+      </div>
+    );
+
+  if (isFinished)
+    return <QuizResult slug={slug as string} showTitle={show.title} />;
 
   return (
     <div
@@ -122,13 +159,15 @@ export default function PlayPage() {
         }}
       >
         <button
-          onClick={() => { resetQuiz(); router.push(`/quiz/${slug}`); }}
+          onClick={() => {
+            resetQuiz();
+            router.push("/");
+          }}
           className="text-sm flex items-center gap-1"
           style={{ color: "var(--text-muted)" }}
         >
           ✕ Quit
         </button>
-
         <div className="flex items-center gap-2">
           <span
             className="font-clash font-semibold text-sm"
@@ -158,8 +197,14 @@ export default function PlayPage() {
 }
 
 function BottomNav({ slug }: { slug: string }) {
-  const { currentIndex, questions, answers, nextQuestion, prevQuestion, finishQuiz } =
-    useQuizStore();
+  const {
+    currentIndex,
+    questions,
+    answers,
+    nextQuestion,
+    prevQuestion,
+    finishQuiz,
+  } = useQuizStore();
 
   const isLast = currentIndex === questions.length - 1;
   const answeredCount = answers.filter((a) => a !== null).length;
@@ -187,17 +232,11 @@ function BottomNav({ slug }: { slug: string }) {
       </span>
 
       {isLast ? (
-        <button
-          className="btn-primary px-6 py-3"
-          onClick={finishQuiz}
-        >
+        <button className="btn-primary px-6 py-3" onClick={finishQuiz}>
           Submit →
         </button>
       ) : (
-        <button
-          className="btn-primary px-6 py-3"
-          onClick={nextQuestion}
-        >
+        <button className="btn-primary px-6 py-3" onClick={nextQuestion}>
           Next →
         </button>
       )}

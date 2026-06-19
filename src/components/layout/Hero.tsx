@@ -31,7 +31,7 @@ export default function Hero({ userName }: { userName: string }) {
             border: "1px solid rgba(229,56,59,0.2)",
           }}
         >
-          12 Shows · 2,400 Questions
+          12 Shows · 1,200 Questions
         </motion.span>
 
         <motion.h1
