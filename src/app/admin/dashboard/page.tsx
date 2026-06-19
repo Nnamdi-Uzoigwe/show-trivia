@@ -7,8 +7,9 @@ import AdminStats from "@/components/admin/AdminStats";
 import AdminQuestions from "@/components/admin/AdminQuestions";
 import AdminLeaderboard from "@/components/admin/AdminLeaderboard";
 import AdminAttempts from "@/components/admin/AdminAttempts";
+import AdminUsers from "@/components/admin/AdminUsers";
 
-type Tab = "stats" | "questions" | "leaderboard" | "attempts";
+type Tab = "stats" | "questions" | "leaderboard" | "attempts" | "users";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -26,12 +27,13 @@ export default function AdminDashboard() {
     router.push("/admin");
   }
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "stats", label: "📊 Overview" },
-    { key: "questions", label: "❓ Questions" },
-    { key: "leaderboard", label: "🏆 Leaderboard" },
-    { key: "attempts", label: "📝 Attempts" },
-  ];
+ const tabs: { key: Tab; label: string }[] = [
+  { key: "stats", label: "📊 Overview" },
+  { key: "questions", label: "❓ Questions" },
+  { key: "leaderboard", label: "🏆 Leaderboard" },
+  { key: "attempts", label: "📝 Attempts" },
+  { key: "users", label: "👤 Users" },
+];
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -115,10 +117,11 @@ export default function AdminDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {activeTab === "stats" && <AdminStats />}
+          {activeTab === "stats" && <AdminStats onTabChange={(tab) => setActiveTab(tab as Tab)} />}
           {activeTab === "questions" && <AdminQuestions />}
           {activeTab === "leaderboard" && <AdminLeaderboard />}
           {activeTab === "attempts" && <AdminAttempts />}
+          {activeTab === "users" && <AdminUsers />}
         </motion.div>
       </div>
     </div>

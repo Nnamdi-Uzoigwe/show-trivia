@@ -37,19 +37,20 @@ export default function QuizResult({ slug, showTitle }: { slug: string; showTitl
   useEffect(() => {
     if (hasSaved.current || !user) return;
     hasSaved.current = true;
-
+  const { fingerprint } = useUserStore.getState();
     fetch("/api/attempts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: user._id,
-        userName: user.name,
-        showSlug: slug,
-        score,
-        totalQuestions: total,
-        timeTaken,
-        answers: getResults(),
-      }),
+  userId: user._id,
+  userName: user.name,
+  showSlug: slug,
+  score,
+  totalQuestions: total,
+  timeTaken,
+  answers: getResults(),
+  fingerprint,
+}),
     }).then(() => setSaved(true));
   }, []);
 

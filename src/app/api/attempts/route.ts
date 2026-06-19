@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const body = await req.json();
-    const { userId, userName, showSlug, score, totalQuestions, timeTaken, answers } = body;
+    const { userId, userName, showSlug, score, totalQuestions, timeTaken, answers, fingerprint } = body;
 
     const show = await Show.findOne({ slug: showSlug });
     if (!show) return NextResponse.json({ error: "Show not found" }, { status: 404 });
@@ -58,7 +58,36 @@ export async function POST(req: NextRequest) {
     }
 
     // Update user stats
-    await User.findByIdAndUpdate(userId, { $inc: { totalQuizzesTaken: 1 }, lastPlayedDate: new Date() });
+   const userDoc = fingerprint
+  ? await User.findOne({ fingerprint })
+  : await User.findById(userId);
+  
+if (userDoc) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  let newStreak = 1;
+
+  if (userDoc.lastPlayedDate) {
+    const last = new Date(userDoc.lastPlayedDate);
+    const lastDay = new Date(last.getFullYear(), last.getMonth(), last.getDate());
+    const diffDays = Math.round((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      newStreak = userDoc.streak || 1;
+    } else if (diffDays === 1) {
+      newStreak = (userDoc.streak || 0) + 1;
+    } else {
+      newStreak = 1;
+    }
+  }
+
+  await User.findByIdAndUpdate(userId, {
+    $inc: { totalQuizzesTaken: 1 },
+    lastPlayedDate: now,
+    streak: newStreak,
+  });
+}
 
     return NextResponse.json({ attempt });
   } catch (error) {
